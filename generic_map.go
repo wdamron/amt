@@ -97,8 +97,7 @@ func (m Map[K, V]) Val(key K) (value V) {
 func (m Map[K, V]) Ptr(key K) *V {
 	hd, l, d := key.Hash(m.seed, 0), &m.link, uint8(0)
 	radix := uint8(hd & 0xF)
-	bit := uint32(1) << radix
-	idx := uint8(bits.OnesCount32(l.pmap&^(^uint32(0)<<radix))) & 0xF
+	bit, idx := uint32(1)<<radix, uint8(bits.OnesCount32(l.pmap&^(^uint32(0)<<radix)))
 	for l.pmap&bit != 0 { // item present
 		item := (*link)(unsafe.Pointer(uintptr(l.ptr) + uintptr(idx)*linkSize))
 		if l.tmap&bit == 0 { // traverse branch
@@ -110,7 +109,7 @@ func (m Map[K, V]) Ptr(key K) *V {
 				hd = key.Hash(m.seed, uint(d>>4))
 			}
 			radix = uint8(hd & 0xF)
-			bit, idx = 1<<radix, uint8(bits.OnesCount32(l.pmap&^(^uint32(0)<<radix)))&0xF
+			bit, idx = 1<<radix, uint8(bits.OnesCount32(l.pmap&^(^uint32(0)<<radix)))
 			continue
 		}
 		if kv := (*kv[K, V])(item.ptr); key.Equal(kv.k) { // key match
@@ -125,8 +124,7 @@ func (m Map[K, V]) Ptr(key K) *V {
 func (m Map[K, V]) Set(key K, value V) {
 	hd, l, d := key.Hash(m.seed, 0), &m.link, uint8(0)
 	radix := uint8(hd & 0xF)
-	bit := uint32(1) << radix
-	idx := uint8(bits.OnesCount32(l.pmap&^(^uint32(0)<<radix))) & 0xF
+	bit, idx := uint32(1)<<radix, uint8(bits.OnesCount32(l.pmap&^(^uint32(0)<<radix)))
 	for l.pmap&bit != 0 { // item present
 		item := (*link)(unsafe.Pointer(uintptr(l.ptr) + uintptr(idx)*linkSize))
 		if l.tmap&bit == 0 { // traverse branch
@@ -138,7 +136,7 @@ func (m Map[K, V]) Set(key K, value V) {
 				hd = key.Hash(m.seed, uint(d>>4))
 			}
 			radix = uint8(hd & 0xF)
-			bit, idx = 1<<radix, uint8(bits.OnesCount32(l.pmap&^(^uint32(0)<<radix)))&0xF
+			bit, idx = 1<<radix, uint8(bits.OnesCount32(l.pmap&^(^uint32(0)<<radix)))
 			continue
 		}
 		ckv := (*kv[K, V])(item.ptr)
@@ -215,8 +213,7 @@ func (m Map[K, V]) Set(key K, value V) {
 func (m Map[K, V]) Mod(key K, mod func(*V, bool)) {
 	hd, l, d := key.Hash(m.seed, 0), &m.link, uint8(0)
 	radix := uint8(hd & 0xF)
-	bit := uint32(1) << radix
-	idx := uint8(bits.OnesCount32(l.pmap&^(^uint32(0)<<radix))) & 0xF
+	bit, idx := uint32(1)<<radix, uint8(bits.OnesCount32(l.pmap&^(^uint32(0)<<radix)))
 	for l.pmap&bit != 0 { // item present
 		item := (*link)(unsafe.Pointer(uintptr(l.ptr) + uintptr(idx)*linkSize))
 		if l.tmap&bit == 0 { // traverse branch
@@ -228,7 +225,7 @@ func (m Map[K, V]) Mod(key K, mod func(*V, bool)) {
 				hd = key.Hash(m.seed, uint(d>>4))
 			}
 			radix = uint8(hd & 0xF)
-			bit, idx = 1<<radix, uint8(bits.OnesCount32(l.pmap&^(^uint32(0)<<radix)))&0xF
+			bit, idx = 1<<radix, uint8(bits.OnesCount32(l.pmap&^(^uint32(0)<<radix)))
 			continue
 		}
 		ckv := (*kv[K, V])(item.ptr)
@@ -308,8 +305,7 @@ func (m Map[K, V]) Del(key K) {
 	path := m.path[:0]
 	hd, l, d := key.Hash(m.seed, 0), &m.link, uint8(0)
 	radix := uint8(hd & 0xF)
-	bit := uint32(1) << radix
-	idx := uint8(bits.OnesCount32(l.pmap&^(^uint32(0)<<radix))) & 0xF
+	bit, idx := uint32(1)<<radix, uint8(bits.OnesCount32(l.pmap&^(^uint32(0)<<radix)))
 	for l.pmap&bit != 0 { // item present
 		path = append(path, pathLink{radix, l})
 		item := (*link)(unsafe.Pointer(uintptr(l.ptr) + uintptr(idx)*linkSize))
@@ -322,7 +318,7 @@ func (m Map[K, V]) Del(key K) {
 				hd = key.Hash(m.seed, uint(d>>4))
 			}
 			radix = uint8(hd & 0xF)
-			bit, idx = 1<<radix, uint8(bits.OnesCount32(l.pmap&^(^uint32(0)<<radix)))&0xF
+			bit, idx = 1<<radix, uint8(bits.OnesCount32(l.pmap&^(^uint32(0)<<radix)))
 			continue
 		}
 		if !key.Equal((*kv[K, V])(item.ptr).k) { // key missing
@@ -340,7 +336,7 @@ func (m Map[K, V]) Del(key K) {
 			d--
 			l, radix = path[d].link, path[d].radix
 			path[d].link = nil
-			bit, idx = 1<<radix, uint8(bits.OnesCount32(l.pmap&^(^uint32(0)<<radix)))&0xF
+			bit, idx = 1<<radix, uint8(bits.OnesCount32(l.pmap&^(^uint32(0)<<radix)))
 			l.pmap &^= bit
 			l.tmap &^= bit
 			count = uint8(bits.OnesCount32(l.pmap))
@@ -365,10 +361,15 @@ func (m Map[K, V]) Del(key K) {
 			d--
 			l, radix = path[d].link, path[d].radix
 			path[d].link = nil
-			bit, idx = 1<<radix, uint8(bits.OnesCount32(l.pmap&^(^uint32(0)<<radix)))&0xF
+			bit, idx = 1<<radix, uint8(bits.OnesCount32(l.pmap&^(^uint32(0)<<radix)))
 			l.tmap |= bit
 			*(*link)(unsafe.Pointer(uintptr(l.ptr) + uintptr(idx)*linkSize)) = link{ptr: kv}
 			count = uint8(bits.OnesCount32(l.pmap))
+		}
+		// clear the path to prevent leaks
+		for d != 0 {
+			d--
+			path[d].link = nil
 		}
 		return // item removed
 	}
