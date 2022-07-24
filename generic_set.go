@@ -208,12 +208,12 @@ func (s Set[K]) Del(key K) {
 		}
 		// shift items back
 		src := l.ptr
-		if count%4 == 0 && d != 0 {
+		if count%4 == 0 && d != 0 { // copy all items when reallocating
 			l.ptr = newLinkArray(count)
-		}
-		for before := uint8(0); before < idx; before++ {
-			*(*link)(unsafe.Pointer(uintptr(l.ptr) + uintptr(before)*linkSize)) =
-				*(*link)(unsafe.Pointer(uintptr(src) + uintptr(before)*linkSize))
+			for before := uint8(0); before < idx; before++ {
+				*(*link)(unsafe.Pointer(uintptr(l.ptr) + uintptr(before)*linkSize)) =
+					*(*link)(unsafe.Pointer(uintptr(src) + uintptr(before)*linkSize))
+			}
 		}
 		for after := idx; after < count; after++ {
 			*(*link)(unsafe.Pointer(uintptr(l.ptr) + uintptr(after)*linkSize)) =
