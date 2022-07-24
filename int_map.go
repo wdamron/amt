@@ -403,14 +403,12 @@ func (m IntMap[V]) Del(key IntKey) {
 		}
 		// replace single-valued branches with key-values up to the root
 		for count == 1 && l.pmap == l.tmap && d != 0 {
-			item := (*link)(l.ptr)
+			*l = *(*link)(l.ptr)
 			m.dep--
 			d--
 			l, radix = path[d].link, path[d].radix
 			path[d].link = nil
-			bit, idx = uint32(1)<<radix, uint8(bits.OnesCount32(l.pmap&^(^uint32(0)<<radix)))
-			l.tmap |= bit
-			*(*link)(unsafe.Pointer(uintptr(l.ptr) + uintptr(idx)*linkSize)) = *item
+			l.tmap |= 1 << radix
 			count = uint8(bits.OnesCount32(l.pmap))
 		}
 		// clear the path to prevent leaks

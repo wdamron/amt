@@ -392,14 +392,12 @@ func (m BytesMap[V]) Del(key []byte) {
 		}
 		// replace single-valued branches with key-values up to the root
 		for count == 1 && l.pmap == l.tmap && d != 0 {
-			kv := (*[1]link)(l.ptr)[0].ptr // *kv
+			*l = *(*link)(l.ptr)
 			m.dep--
 			d--
 			l, radix = path[d].link, path[d].radix
 			path[d].link = nil
-			bit, idx = 1<<radix, uint8(bits.OnesCount32(l.pmap&^(^uint32(0)<<radix)))
-			l.tmap |= bit
-			*(*link)(unsafe.Pointer(uintptr(l.ptr) + uintptr(idx)*linkSize)) = link{ptr: kv}
+			l.tmap |= 1 << radix
 			count = uint8(bits.OnesCount32(l.pmap))
 		}
 		// clear the path to prevent leaks
