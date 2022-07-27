@@ -67,10 +67,7 @@ func (s Set[K]) Has(key K) bool {
 			bit, idx = 1<<radix, uint8(bits.OnesCount32(l.pmap&^(^uint32(0)<<radix)))
 			continue
 		}
-		if kv := (*kv[K, struct{}])(item.ptr); key.Equal(kv.k) { // key match
-			return true
-		}
-		return false // key mismatch
+		return key.Equal((*kv[K, struct{}])(item.ptr).k) // key match/mismatch
 	}
 	return false // item missing
 }

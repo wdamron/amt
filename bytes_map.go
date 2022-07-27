@@ -225,6 +225,7 @@ func (m BytesMap[V]) Set(key []byte, value V) {
 
 // Mod modifies the value for key using the mod callback. The mod callback receives
 // a pointer to the existing or new value for key, and true if the key existed.
+// The key slice may be retained in m, and must not be modified after the key is added.
 func (m BytesMap[V]) Mod(key []byte, mod func(*V, bool)) {
 	var hw maphash.Hash
 	hw.SetSeed(m.seed)

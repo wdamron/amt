@@ -74,10 +74,7 @@ func (s BytesSet) Has(key []byte) bool {
 			bit, idx = 1<<radix, uint8(bits.OnesCount32(l.pmap&^(^uint32(0)<<radix)))
 			continue
 		}
-		if kv := (*byteskv[struct{}])(item.ptr); bytes.Equal(kv.k, key) { // key match
-			return true
-		}
-		return false // key mismatch
+		return bytes.Equal(key, (*byteskv[struct{}])(item.ptr).k) // key match/mismatch
 	}
 	return false // item missing
 }

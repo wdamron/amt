@@ -73,10 +73,7 @@ func (s ArrSet[K]) Has(key K) bool {
 			bit, idx = 1<<radix, uint8(bits.OnesCount32(l.pmap&^(^uint32(0)<<radix)))
 			continue
 		}
-		if kv := (*arrkv[K, struct{}])(item.ptr); kv.k == key { // key match
-			return true
-		}
-		return false // key mismatch
+		return key == (*arrkv[K, struct{}])(item.ptr).k // key match/mismatch
 	}
 	return false // item missing
 }

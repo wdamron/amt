@@ -73,10 +73,7 @@ func (s IntSet) Has(key IntKey) bool {
 			bit, idx = 1<<radix, uint8(bits.OnesCount32(l.pmap&^(^uint32(0)<<radix)))
 			continue
 		}
-		if k := IntKey(item.pmap) | (IntKey(item.tmap) << 32); k == key { // key match
-			return true
-		}
-		return false // key mismatch
+		return key == IntKey(item.pmap)|(IntKey(item.tmap)<<32) // key match/mismatch
 	}
 	return false // item missing
 }
